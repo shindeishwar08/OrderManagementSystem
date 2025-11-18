@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RegisterRequest {
 
-    @NotBlank(message="Nmae cannot be blank")
+    @NotBlank(message="Name cannot be blank")
     private String name;
 
     @NotBlank(message="Email is required")
@@ -23,7 +23,7 @@ public class RegisterRequest {
     private String email;
 
     @NotBlank(message="Enter a new Password")
-    @Size(min=6,message="Paswword need to be of minimum 6 characters.")
+    @Size(min=6,message="Password needs to be of minimum 6 characters")
     private String password;
     private Role role; //Needs validation
 }
