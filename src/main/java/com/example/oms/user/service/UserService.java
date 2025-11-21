@@ -1,5 +1,10 @@
 package com.example.oms.user.service;
 
+import java.util.ArrayList;
+
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
     
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -35,6 +40,12 @@ public class UserService {
 
         public UserEntity findByEmail(String email){
             return userRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("User not found by email " + email));
+        }
+
+        public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException{
+            UserEntity user = userRepository.findByEmail(email).orElseThrow(()-> new UsernameNotFoundException("User not found with email"+email));
+        
+            return new org.springframework.security.core.userdetails.User(user.getEmail(),user.getPassword(),new ArrayList<>());
         }
 
 }
