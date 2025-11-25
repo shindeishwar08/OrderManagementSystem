@@ -3,7 +3,6 @@ package com.example.oms.auth.service;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Service;
 
 import com.example.oms.auth.dto.AuthResponse;
@@ -22,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthService{
     private final UserService userService;
     private final JwtUtil jwtUtil;
-    private final AuthenticationManager authenticationManager; //Form SecurityConfig.java
+    private final AuthenticationManager authenticationManager; //From SecurityConfig.java
 
 
     public UserMeResponse register(RegisterRequest request){

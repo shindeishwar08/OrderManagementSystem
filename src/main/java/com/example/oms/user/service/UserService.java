@@ -42,6 +42,8 @@ public class UserService implements UserDetailsService {
             return userRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("User not found by email " + email));
         }
 
+
+        //Here we taught Spring Security how to talk to our database so it can load user details during authentication.
         public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException{
             UserEntity user = userRepository.findByEmail(email).orElseThrow(()-> new UsernameNotFoundException("User not found with email"+email));
         
