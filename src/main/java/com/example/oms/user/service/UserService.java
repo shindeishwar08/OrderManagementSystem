@@ -1,7 +1,8 @@
 package com.example.oms.user.service;
 
-import java.util.ArrayList;
+import java.util.List;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -44,10 +45,29 @@ public class UserService implements UserDetailsService {
 
 
         //Here we taught Spring Security how to talk to our database so it can load user details during authentication.
-        public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException{
-            UserEntity user = userRepository.findByEmail(email).orElseThrow(()-> new UsernameNotFoundException("User not found with email"+email));
-        
-            return new org.springframework.security.core.userdetails.User(user.getEmail(),user.getPassword(),new ArrayList<>());
+        public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+            UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+            // Convert Role Enum -> GrantedAuthority
+            // Spring expects roles to look like "ROLE_CUSTOMER"
+                List<SimpleGrantedAuthority> authorities = List.of(
+                    new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+                );
+
+                return new org.springframework.security.core.userdetails.User(
+                    user.getEmail(),
+                    user.getPassword(),
+                    authorities // <--- Pass the real role here!
+                );
         }
+
+
+        
+        // public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException{
+        //     UserEntity user = userRepository.findByEmail(email).orElseThrow(()-> new UsernameNotFoundException("User not found with email"+email));
+        
+        //     return new org.springframework.security.core.userdetails.User(user.getEmail(),user.getPassword(),new ArrayList<>());
+        // }
 
 }
