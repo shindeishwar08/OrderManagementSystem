@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.oms.auth.dto.RegisterRequest;
+import com.example.oms.common.exception.EmailAlreadyExistsException;
 import com.example.oms.user.dto.UserMeResponse;
 import com.example.oms.user.entity.UserEntity;
 import com.example.oms.user.mapper.UserMapper;
@@ -29,7 +30,7 @@ public class UserService implements UserDetailsService {
         public UserMeResponse register(RegisterRequest request){
 
             if(userRepository.findByEmail(request.getEmail()).isPresent()){
-                throw new RuntimeException("Email already exists");
+                throw new EmailAlreadyExistsException("Email already exists");
             }
 
             UserEntity user = UserEntity.builder().name(request.getName()).email(request.getEmail()).password(passwordEncoder.encode(request.getPassword())).role(request.getRole()).build();
@@ -40,7 +41,7 @@ public class UserService implements UserDetailsService {
         }
 
         public UserEntity findByEmail(String email){
-            return userRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("User not found by email " + email));
+            return userRepository.findByEmail(email).orElseThrow(()-> new UsernameNotFoundException("User not found by email " + email));
         }
 
 

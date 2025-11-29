@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.oms.common.exception.InvalidStateException;
 import com.example.oms.order.dto.CreateOrderRequest;
 import com.example.oms.order.dto.OrderResponse;
 import com.example.oms.order.entity.OrderEntity;
@@ -57,11 +58,11 @@ public class OrderService {
         OrderEntity order = orderRepository.findById(orderId).orElseThrow(()-> new RuntimeException("Order not found"));
 
         if(!order.getCustomer().getId().equals(customer.getId())){
-            throw new RuntimeException("Access Denied: You do not own this order");
+            throw new org.springframework.security.access.AccessDeniedException("Access Denied: You do not own this order");
         }
 
         if(order.getStatus()!=OrderStatus.CREATED && order.getStatus()!=OrderStatus.ASSIGNED){
-            throw new RuntimeException("Cannot cancel order in status: " + order.getStatus());
+            throw new InvalidStateException("Cannot cancel order in status: " + order.getStatus());
         }
 
         order.setStatus(OrderStatus.CANCELLED);

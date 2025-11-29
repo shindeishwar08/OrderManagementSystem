@@ -22,7 +22,7 @@ public class PartnerService {
     public UserMeResponse updateAvailability(UserEntity partner, boolean available){
 
         if(partner.getRole()!= Role.PARTNER){
-            throw new RuntimeException("User not partner");
+            throw new org.springframework.security.access.AccessDeniedException("User not partner");
         }
 
         partner.setAvailable(available);
