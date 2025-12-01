@@ -73,4 +73,82 @@ public class OrderService {
         return orderMapper.toResponse(savedOrder);
     }
 
+    public List<OrderResponse> getPartnerOrders(UserEntity partner){
+        List<OrderStatus> statuses = List.of(OrderStatus.ASSIGNED, OrderStatus.ACCEPTED, OrderStatus.PICKED);
+
+        List<OrderEntity> entities = orderRepository.findAllByPartnerAndStatusIn(partner, statuses);
+
+        List<OrderResponse> responses = new ArrayList<>();
+
+        for(int i=0;i<entities.size();i++){
+            responses.add(orderMapper.toResponse(entities.get(i)));
+        }
+
+        return responses;
+    }
+
+    //Accept Order
+    public OrderResponse acceptOrder(Long orderId, UserEntity partner) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order Not Found"));
+
+        if (order.getStatus() != OrderStatus.ASSIGNED) {
+            throw new InvalidStateException("Operation failed: Order is not currently ASSIGNED");
+        }
+
+        if (!order.getPartner().getId().equals(partner.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Access Denied: This order is not assigned to you");
+        }
+
+        order.setStatus(OrderStatus.ACCEPTED);
+        OrderEntity savedOrder = orderRepository.save(order);
+        return orderMapper.toResponse(savedOrder);
+    }
+
+    //Decline Order
+    public OrderResponse declineOrder(Long orderId, UserEntity partner) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order Not Found"));
+
+        if (order.getStatus() != OrderStatus.ASSIGNED) {
+            throw new InvalidStateException("Operation failed: Order is not currently ASSIGNED");
+        }
+
+        if (!order.getPartner().getId().equals(partner.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Access Denied: This order is not assigned to you");
+        }
+
+        order.setPartner(null);
+        order.setStatus(OrderStatus.CREATED);
+
+        OrderEntity savedOrder = orderRepository.save(order);
+        return orderMapper.toResponse(savedOrder);
+    }
+
+    public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus, UserEntity partner){
+        OrderEntity order = orderRepository.findById(orderId).orElseThrow(()-> new ResourceNotFoundException("Order Not Found"));
+
+        if(order.getPartner()==null || !order.getPartner().getId().equals(partner.getId())){
+            throw new org.springframework.security.access.AccessDeniedException("Access Denied: This order is not assigned to you");
+        }
+
+        OrderStatus currStatus = order.getStatus();
+        boolean isValid = false;
+
+        if(currStatus==OrderStatus.ACCEPTED && newStatus==OrderStatus.PICKED){
+            isValid=true;
+        }else if(currStatus==OrderStatus.PICKED && newStatus==OrderStatus.DELIVERED){
+            isValid=true;
+        }
+
+        if (!isValid) throw new InvalidStateException("Invalid transition: Cannot go from " + currStatus + " to " + newStatus);
+        
+
+        order.setStatus(newStatus);
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        return orderMapper.toResponse(savedOrder);
+
+    }
+
 }

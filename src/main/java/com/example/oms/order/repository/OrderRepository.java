@@ -16,4 +16,8 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
     // New Method for Load Balancing
     // Counts orders where (partner_id = ? AND status IN (?,?,?))
     Long countByPartnerIdAndStatusIn(Long partnerId, List<OrderStatus> statuses);
+
+    // Fetch the actual list of orders
+    List<OrderEntity> findAllByPartnerAndStatusIn(UserEntity partner, List<OrderStatus> statuses);
+
 }
