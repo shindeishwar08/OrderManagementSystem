@@ -35,7 +35,7 @@ public class OrderEntity extends BaseAudit {
     @JoinColumn(name = "customer_id", nullable=false)
     private UserEntity customer;
 
-    @ManyToOne// A
+    @ManyToOne
     @JoinColumn(name="partner_id")// It is nullable as initially when order is created partner is not assigned, system assigns it after order is created.
     private UserEntity partner;
 

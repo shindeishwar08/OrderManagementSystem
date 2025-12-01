@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.oms.common.exception.InvalidStateException;
+import com.example.oms.common.exception.ResourceNotFoundException;
 import com.example.oms.order.dto.CreateOrderRequest;
 import com.example.oms.order.dto.OrderResponse;
 import com.example.oms.order.entity.OrderEntity;
@@ -55,7 +56,7 @@ public class OrderService {
     //Order Cancellation
     public OrderResponse cancelOrder(Long orderId, UserEntity customer){
     
-        OrderEntity order = orderRepository.findById(orderId).orElseThrow(()-> new RuntimeException("Order not found"));
+        OrderEntity order = orderRepository.findById(orderId).orElseThrow(()-> new ResourceNotFoundException("Order not found"));
 
         if(!order.getCustomer().getId().equals(customer.getId())){
             throw new org.springframework.security.access.AccessDeniedException("Access Denied: You do not own this order");

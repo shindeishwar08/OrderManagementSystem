@@ -58,7 +58,7 @@ This project demonstrates production-grade architecture, including stateless JWT
 
 1.  **Clone the repo**
     ```bash
-    git clone [https://github.com/shindeishwar08/OrderManagementSystem.git](https://github.com/shindeishwar08/OrderManagementSystem.git)
+    git clone https://github.com/shindeishwar08/OrderManagementSystem.git
     ```
 
 2.  **Configure Database**

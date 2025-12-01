@@ -57,7 +57,6 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, e.getMessage());
     }
 
-    // Helper method to save typing
     private ResponseEntity<ApiError> buildResponse(HttpStatus status, String message) {
         ApiError error = ApiError.builder()
                 .errorCode(status.value())
