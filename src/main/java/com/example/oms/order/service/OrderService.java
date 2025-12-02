@@ -24,6 +24,7 @@ public class OrderService {
     
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
+    private final AssignmentService assignmentService;
 
     //New Order Creation
     public OrderResponse createOrder(CreateOrderRequest request, UserEntity customer){
@@ -31,6 +32,8 @@ public class OrderService {
         OrderEntity entity = orderMapper.toEntity(request, customer);
 
         OrderEntity savedOrder = orderRepository.save(entity);
+
+        assignmentService.assignOrder(savedOrder);
 
         return orderMapper.toResponse(savedOrder);
 
@@ -122,6 +125,9 @@ public class OrderService {
         order.setStatus(OrderStatus.CREATED);
 
         OrderEntity savedOrder = orderRepository.save(order);
+
+        assignmentService.assignOrder(savedOrder);
+        
         return orderMapper.toResponse(savedOrder);
     }
 
