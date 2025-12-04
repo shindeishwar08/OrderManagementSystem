@@ -3,8 +3,11 @@ package com.example.oms.order.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.example.oms.admin.dto.AnalyticsResponse;
 import com.example.oms.common.exception.InvalidStateException;
 import com.example.oms.common.exception.ResourceNotFoundException;
 import com.example.oms.order.dto.CreateOrderRequest;
@@ -14,6 +17,7 @@ import com.example.oms.order.entity.OrderStatus;
 import com.example.oms.order.mapper.OrderMapper;
 import com.example.oms.order.repository.OrderRepository;
 import com.example.oms.user.entity.UserEntity;
+import com.example.oms.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +29,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
     private final AssignmentService assignmentService;
+    private final UserRepository userRepository;
 
     //New Order Creation
     public OrderResponse createOrder(CreateOrderRequest request, UserEntity customer){
@@ -131,6 +136,7 @@ public class OrderService {
         return orderMapper.toResponse(savedOrder);
     }
 
+    //Final Order Lifecycle transitions
     public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus, UserEntity partner){
         OrderEntity order = orderRepository.findById(orderId).orElseThrow(()-> new ResourceNotFoundException("Order Not Found"));
 
@@ -156,5 +162,44 @@ public class OrderService {
         return orderMapper.toResponse(savedOrder);
 
     }
+
+    // Get All Orders (Filtered & Paged)
+    public Page<OrderResponse> getAllOrders(Pageable pageable, OrderStatus status, Long partnerId){
+        Page<OrderEntity> response = orderRepository.findAllByFilters(status, partnerId, null, null, pageable);
+
+        return response.map(orderMapper::toResponse);
+    }
+
+
+    //Assign order manually
+    public OrderResponse manualAssign(Long orderId, Long partnerId){
+        OrderEntity order = orderRepository.findById(orderId).orElseThrow(()-> new ResourceNotFoundException("Order Not Found"));
+
+        UserEntity partner = userRepository.findById(partnerId).orElseThrow(()-> new ResourceNotFoundException("Partner Not Found"));
+
+        OrderEntity updatedOrder = assignmentService.manualAssign(order, partner);
+
+        return orderMapper.toResponse(updatedOrder);
+    }
+
+    public AnalyticsResponse getAnalytics(){
+
+        List<OrderStatus> activeStatuses = List.of(OrderStatus.ASSIGNED,OrderStatus.ACCEPTED,OrderStatus.PICKED);
+        
+        Long totalOrders = orderRepository.count();
+
+        Long actives = orderRepository.countByStatusIn(activeStatuses);
+
+        Long delivered = orderRepository.countByStatus(OrderStatus.DELIVERED);
+        
+        Double totalRevenue= orderRepository.sumTotalAmount();
+        if(orderRepository.sumTotalAmount()==null){
+            totalRevenue=0.0;
+        }
+
+        return AnalyticsResponse.builder().totalOrders(totalOrders).activeOrders(actives).deliveredOrders(delivered).totalRevenue(totalRevenue).build();
+
+    }
+
 
 }

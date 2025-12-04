@@ -1,5 +1,6 @@
 package com.example.oms.user.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,7 +12,11 @@ import org.springframework.stereotype.Service;
 
 import com.example.oms.auth.dto.RegisterRequest;
 import com.example.oms.common.exception.EmailAlreadyExistsException;
+import com.example.oms.order.entity.OrderStatus;
+import com.example.oms.order.repository.OrderRepository;
+import com.example.oms.user.dto.PartnerSummary;
 import com.example.oms.user.dto.UserMeResponse;
+import com.example.oms.user.entity.Role;
 import com.example.oms.user.entity.UserEntity;
 import com.example.oms.user.mapper.UserMapper;
 import com.example.oms.user.repository.UserRepository;
@@ -25,6 +30,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final OrderRepository orderRepository;
 
 
         public UserMeResponse register(RegisterRequest request){
@@ -70,5 +76,31 @@ public class UserService implements UserDetailsService {
         
         //     return new org.springframework.security.core.userdetails.User(user.getEmail(),user.getPassword(),new ArrayList<>());
         // }
+
+
+        // Get Partners (With Optional Filter)
+        public List<PartnerSummary> getAllPartners(Boolean available){
+
+            List<UserEntity> partners;
+
+            if(available!=null){
+                partners=userRepository.findAllByRoleAndAvailable(Role.PARTNER, available);
+            }else{
+                partners=userRepository.findAllByRole(Role.PARTNER);
+            }
+
+            List<OrderStatus> activeStatuses = List.of(OrderStatus.ASSIGNED,OrderStatus.ACCEPTED,OrderStatus.PICKED);
+
+            List<PartnerSummary> response = new ArrayList<>();
+        
+            for(UserEntity p:partners){
+                Long load = orderRepository.countByPartnerIdAndStatusIn(p.getId(), activeStatuses);
+
+                response.add(PartnerSummary.builder().id(p.getId()).name(p.getName()).email(p.getEmail()).available(p.isAvailable()).currentLoad(load).build());
+            }
+
+            return response;
+        
+        }
 
 }

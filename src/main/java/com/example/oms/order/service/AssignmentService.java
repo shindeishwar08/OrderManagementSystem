@@ -47,4 +47,11 @@ public class AssignmentService {
 
         orderRepository.save(order);
     }
+
+    public OrderEntity manualAssign(OrderEntity order, UserEntity partner){
+        order.setPartner(partner);
+        order.setStatus(OrderStatus.ASSIGNED);
+
+        return orderRepository.save(order);
+    }
 }
