@@ -1,4 +1,4 @@
-# Hyperlocal Delivery - Order Management System (OMS)
+# 🚀 Hyperlocal Delivery - Order Management System (OMS)
 
 A robust, backend-focused Order Management System built with **Spring Boot 3**.
 This project demonstrates production-grade architecture, including stateless JWT authentication, Role-Based Access Control (RBAC), and complex state management for delivery orders.
@@ -24,10 +24,20 @@ This project demonstrates production-grade architecture, including stateless JWT
 * **Validation:** Strict input validation using Java Bean Validation (`@Valid`).
 
 ### 📦 Order Management (Phase 2)
-* **Order Lifecycle:** Full state machine (`CREATED` -> `CONFIRMED` -> `ASSIGNED` -> ...).
+* **Order Lifecycle:** Full state machine (`CREATED` → `ASSIGNED` → `ACCEPTED` → `PICKED` → `DELIVERED`).
 * **Customer Flow:** Create orders, view history, and cancel active orders.
-* **Partner Flow:** Delivery partners can toggle availability (Online/Offline).
 * **Error Handling:** Global Exception Handling with standardized JSON error responses.
+
+### 🚚 Smart Logistics Engine (Phase 3)
+* **Auto-Assignment:** "Matchmaker" algorithm automatically assigns orders to the least busy available partner.
+* **Partner Dashboard:** Partners can view assigned jobs and manage their availability.
+* **Delivery Flow:** Strict validation for delivery status updates (Accept → Pick → Deliver).
+
+### 👑 Admin Dashboard (Phase 4)
+* **Search Engine:** Dynamic filtering by Status, Partner, and Date with Pagination.
+* **God Mode:** Manual override to force-assign stuck orders to specific partners.
+* **Live Roster:** View all partners, their online status, and current workload.
+* **Analytics:** Real-time stats on total orders, active deliveries, and revenue.
 
 ---
 
@@ -40,7 +50,7 @@ This project demonstrates production-grade architecture, including stateless JWT
 | `POST` | `/auth/login`     | Login and receive JWT Token          | Public      |
 | `GET`  | `/user/me`        | Get current user profile             | Authenticated |
 
-### 🛒 Orders (Customer)
+### 🛒 Customer
 | Method | Endpoint | Description | Access |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/orders` | Create a new delivery order | `CUSTOMER` |
@@ -51,6 +61,18 @@ This project demonstrates production-grade architecture, including stateless JWT
 | Method | Endpoint | Description | Access |
 | :--- | :--- | :--- | :--- |
 | `PUT` | `/partner/status` | Toggle availability (true/false) | `PARTNER` |
+| `GET` | `/partner/orders` | View assigned/active orders | `PARTNER` |
+| `PUT` | `/partner/orders/accept/{id}` | Accept an assigned order | `PARTNER` |
+| `PUT` | `/partner/orders/decline/{id}` | Decline an order (Re-triggers assignment) | `PARTNER` |
+| `PUT` | `/partner/orders/update/{id}` | Update status (PICKED, DELIVERED) | `PARTNER` |
+
+### 👮‍♂️ Admin
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/admin/orders` | Search all orders (Filter + Pagination) | `ADMIN` |
+| `PUT` | `/admin/orders/assign/{id}` | Force-assign order to a partner | `ADMIN` |
+| `GET` | `/admin/partners` | View Partner Roster & Load | `ADMIN` |
+| `GET` | `/admin/stats` | View Analytics (Revenue, Counts) | `ADMIN` |
 
 ---
 
@@ -72,15 +94,15 @@ This project demonstrates production-grade architecture, including stateless JWT
     ```
 
 4.  **Test with Postman**
-    * Import the collection (optional).
-    * Hit `POST /auth/register` to create a user.
-    * Hit `POST /auth/login` to get a Bearer Token.
+    * Hit `POST /auth/register` to create users.
+    * Hit `POST /auth/login` to get Bearer Tokens.
+    * Use tokens in the `Authorization` header for protected routes.
 
 ---
 
-## 📈 Roadmap
+## 📈 Roadmap (Completed)
 
 * [x] **Phase 1:** Foundation, Auth, Security Configuration.
 * [x] **Phase 2:** Order Lifecycle (Create, Cancel, List).
-* [ ] **Phase 3:** Delivery Partner Flow (Accept, Pick, Deliver).
-* [ ] **Phase 4:** Admin Dashboard & Analytics.
+* [x] **Phase 3:** Delivery Partner Flow & Auto-Assignment Logic.
+* [x] **Phase 4:** Admin Dashboard & Analytics.
