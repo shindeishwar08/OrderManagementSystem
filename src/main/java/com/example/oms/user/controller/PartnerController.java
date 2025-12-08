@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.oms.common.exception.InvalidStateException;
+import com.example.oms.location.dto.PartnerLocationRequest;
+import com.example.oms.location.service.LocationService;
 import com.example.oms.order.dto.OrderResponse;
 import com.example.oms.order.dto.OrderStatusUpdateRequest;
 import com.example.oms.order.service.OrderService;
@@ -34,6 +37,7 @@ public class PartnerController {
     private final PartnerService partnerService;
     private final UserService userService;
     private final OrderService orderService;
+    private final LocationService locationService;
 
     
     @PutMapping("/status") 
@@ -71,5 +75,22 @@ public class PartnerController {
         UserEntity partner = userService.findByEmail(userDetails.getUsername());
 
         return ResponseEntity.ok(orderService.updateOrderStatus(orderId, request.getOrderStatus(), partner));
+    }
+
+
+
+
+
+
+
+    @PutMapping("/location")
+    public ResponseEntity<Void> updateLocation(@Valid @RequestBody PartnerLocationRequest request, @AuthenticationPrincipal UserDetails userDetails){
+        UserEntity partner = userService.findByEmail(userDetails.getUsername());
+
+        if(!partner.isAvailable()) throw new InvalidStateException("Partner is unavailable");
+
+        locationService.savePartnerLocation(partner.getId(), request.getLatitude(), request.getLongitude());
+
+        return ResponseEntity.ok().build();
     }
 }

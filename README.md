@@ -1,4 +1,4 @@
-# 🚀 Hyperlocal Delivery - Order Management System (OMS)
+# Hyperlocal Delivery - Order Management System (OMS)
 
 A robust, backend-focused Order Management System built with **Spring Boot 3**.
 This project demonstrates production-grade architecture, including stateless JWT authentication, Role-Based Access Control (RBAC), and complex state management for delivery orders.
