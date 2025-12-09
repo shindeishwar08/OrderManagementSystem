@@ -82,7 +82,7 @@ public class PartnerController {
 
 
 
-
+    //Geo-Location
     @PutMapping("/location")
     public ResponseEntity<Void> updateLocation(@Valid @RequestBody PartnerLocationRequest request, @AuthenticationPrincipal UserDetails userDetails){
         UserEntity partner = userService.findByEmail(userDetails.getUsername());
