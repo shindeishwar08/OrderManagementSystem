@@ -29,7 +29,12 @@ public class AssignmentService {
         double warehouseLat = 18.5204;
         double warehouseLon = 73.8567;
 
-        List<String> nearByIds = locationService.findNearestPartners(warehouseLat, warehouseLon, 3.0);
+        List<String> nearByIds = new ArrayList<>();
+        try {
+            nearByIds = locationService.findNearestPartners(warehouseLat, warehouseLon, 3.0);
+        } catch (Exception e) {
+            System.out.println("Redis is Down"+e.getMessage());
+        }
 
         List<UserEntity> partners = new ArrayList<>();
 

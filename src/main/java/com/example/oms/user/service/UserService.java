@@ -3,6 +3,7 @@ package com.example.oms.user.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.geo.Point;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,6 +13,10 @@ import org.springframework.stereotype.Service;
 
 import com.example.oms.auth.dto.RegisterRequest;
 import com.example.oms.common.exception.EmailAlreadyExistsException;
+import com.example.oms.common.exception.InvalidStateException;
+import com.example.oms.common.exception.ResourceNotFoundException;
+import com.example.oms.location.dto.TrackingResponse;
+import com.example.oms.location.service.LocationService;
 import com.example.oms.order.entity.OrderStatus;
 import com.example.oms.order.repository.OrderRepository;
 import com.example.oms.user.dto.PartnerSummary;
@@ -31,6 +36,7 @@ public class UserService implements UserDetailsService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final OrderRepository orderRepository;
+    private final LocationService locationService;
 
 
         public UserMeResponse register(RegisterRequest request){
@@ -101,6 +107,21 @@ public class UserService implements UserDetailsService {
 
             return response;
         
+        }
+
+        // ADMIN STUFF
+        public TrackingResponse trackPartner(Long partnerId){
+
+            UserEntity partner = userRepository.findById(partnerId).orElseThrow(()-> new ResourceNotFoundException("User Not Found"));
+
+            if(partner.getRole()!=Role.PARTNER) throw new InvalidStateException("User is not a Partner");
+
+            Point location = locationService.getPartnerLocation(partner.getId());
+            if(location==null) throw new InvalidStateException("Location unknown (Partner has never logged in)");
+
+            TrackingResponse response = TrackingResponse.builder().partnerId(String.valueOf(partner.getId())).lat(location.getY()).lon(location.getX()).status(String.valueOf(partner.isAvailable())).build();
+
+            return response;
         }
 
 }

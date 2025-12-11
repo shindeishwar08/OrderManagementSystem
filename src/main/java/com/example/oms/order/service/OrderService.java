@@ -3,13 +3,18 @@ package com.example.oms.order.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.parsing.Location;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.geo.Point;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.oms.admin.dto.AnalyticsResponse;
 import com.example.oms.common.exception.InvalidStateException;
 import com.example.oms.common.exception.ResourceNotFoundException;
+import com.example.oms.location.dto.TrackingResponse;
+import com.example.oms.location.service.LocationService;
 import com.example.oms.order.dto.CreateOrderRequest;
 import com.example.oms.order.dto.OrderResponse;
 import com.example.oms.order.entity.OrderEntity;
@@ -30,6 +35,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final AssignmentService assignmentService;
     private final UserRepository userRepository;
+    private final LocationService locationService;
 
     //New Order Creation
     public OrderResponse createOrder(CreateOrderRequest request, UserEntity customer){
@@ -201,5 +207,38 @@ public class OrderService {
 
     }
 
+    public OrderResponse getOrderById(Long id){
+        OrderEntity order = orderRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Order Not Found"));
+
+        return orderMapper.toResponse(order);
+
+    }
+
+    public TrackingResponse trackOrder(Long orderId, UserEntity customer){
+
+        OrderEntity order = orderRepository.findById(orderId).orElseThrow(()-> new ResourceNotFoundException("Order Not Found"));
+        if(order.getCustomer().getId()!=customer.getId()) throw new InvalidStateException("Order does not belong to you");
+
+        List<OrderStatus> trackableStatuses = List.of(OrderStatus.ACCEPTED, OrderStatus.PICKED);
+
+        if (!trackableStatuses.contains(order.getStatus())) {
+            if (order.getStatus() == OrderStatus.ASSIGNED || order.getStatus() == OrderStatus.CREATED) {
+                throw new InvalidStateException("Waiting for partner to accept the order...");
+            } else {
+                throw new InvalidStateException("Tracking is not active for order status: " + order.getStatus());
+            }
+        }
+
+        if(order.getPartner()==null) throw new InvalidStateException("Order is yet to be Assigned");
+
+        Point location = locationService.getPartnerLocation(order.getPartner().getId());
+        if (location == null) {
+            throw new InvalidStateException("Partner location unavailable (Waiting for GPS)");
+        }
+
+        TrackingResponse response = TrackingResponse.builder().partnerId(String.valueOf(order.getPartner().getId())).lat(location.getY()).lon(location.getX()).status(String.valueOf(order.getStatus())).build();
+
+        return response;
+    }
 
 }
