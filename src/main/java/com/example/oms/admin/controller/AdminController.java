@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.geo.Point;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +20,6 @@ import com.example.oms.order.dto.OrderResponse;
 import com.example.oms.order.entity.OrderStatus;
 import com.example.oms.order.service.OrderService;
 import com.example.oms.user.dto.PartnerSummary;
-
 import com.example.oms.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;

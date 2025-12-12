@@ -3,11 +3,9 @@ package com.example.oms.order.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.parsing.Location;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.geo.Point;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.oms.admin.dto.AnalyticsResponse;
