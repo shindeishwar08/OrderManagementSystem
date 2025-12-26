@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.oms.common.exception.ResourceNotFoundException;
 import com.example.oms.location.service.LocationService;
@@ -24,7 +25,8 @@ public class AssignmentService {
     private final LocationService locationService;
 
     //'synchronized' here for simple thread-safety
-    public synchronized void assignOrder(OrderEntity order) {
+    @Transactional
+    public void assignOrder(OrderEntity order) {
 
         double warehouseLat = 18.5204;
         double warehouseLon = 73.8567;

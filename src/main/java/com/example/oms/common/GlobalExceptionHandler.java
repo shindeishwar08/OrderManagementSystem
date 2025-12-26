@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.example.oms.common.exception.EmailAlreadyExistsException;
 import com.example.oms.common.exception.InvalidStateException;
+import com.example.oms.common.exception.RateLimitExceededException;
 import com.example.oms.common.exception.ResourceNotFoundException;
 
 @RestControllerAdvice
@@ -55,6 +56,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<ApiError> emailAlreadyExists(EmailAlreadyExistsException e){
         return buildResponse(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiError> rateLimitExceeded(RateLimitExceededException e){
+        return buildResponse(HttpStatus.TOO_MANY_REQUESTS, e.getMessage());
     }
 
     private ResponseEntity<ApiError> buildResponse(HttpStatus status, String message) {

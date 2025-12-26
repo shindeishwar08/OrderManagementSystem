@@ -67,6 +67,7 @@ public class PartnerController {
         UserEntity partner = userService.findByEmail(userDetails.getUsername());
 
         return ResponseEntity.ok(orderService.declineOrder(orderId, partner));
+        
     }
 
     @PutMapping("/orders/update/{orderId}")

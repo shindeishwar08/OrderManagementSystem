@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.oms.admin.dto.AnalyticsResponse;
 import com.example.oms.common.exception.InvalidStateException;
@@ -36,6 +37,7 @@ public class OrderService {
     private final LocationService locationService;
 
     //New Order Creation
+    @Transactional
     public OrderResponse createOrder(CreateOrderRequest request, UserEntity customer){
         
         OrderEntity entity = orderMapper.toEntity(request, customer);
@@ -66,6 +68,7 @@ public class OrderService {
     }
 
     //Order Cancellation
+    @Transactional
     public OrderResponse cancelOrder(Long orderId, UserEntity customer){
     
         OrderEntity order = orderRepository.findById(orderId).orElseThrow(()-> new ResourceNotFoundException("Order not found"));
@@ -100,6 +103,7 @@ public class OrderService {
     }
 
     //Accept Order
+    @Transactional
     public OrderResponse acceptOrder(Long orderId, UserEntity partner) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order Not Found"));
@@ -118,6 +122,7 @@ public class OrderService {
     }
 
     //Decline Order
+    @Transactional
     public OrderResponse declineOrder(Long orderId, UserEntity partner) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order Not Found"));
@@ -141,6 +146,7 @@ public class OrderService {
     }
 
     //Final Order Lifecycle transitions
+    @Transactional
     public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus, UserEntity partner){
         OrderEntity order = orderRepository.findById(orderId).orElseThrow(()-> new ResourceNotFoundException("Order Not Found"));
 
