@@ -105,7 +105,7 @@ public class OrderService {
     //Accept Order
     @Transactional
     public OrderResponse acceptOrder(Long orderId, UserEntity partner) {
-        OrderEntity order = orderRepository.findById(orderId)
+        OrderEntity order = orderRepository.findByIdWithLock(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order Not Found"));
 
         if (order.getStatus() != OrderStatus.ASSIGNED) {
@@ -124,7 +124,7 @@ public class OrderService {
     //Decline Order
     @Transactional
     public OrderResponse declineOrder(Long orderId, UserEntity partner) {
-        OrderEntity order = orderRepository.findById(orderId)
+        OrderEntity order = orderRepository.findByIdWithLock(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order Not Found"));
 
         if (order.getStatus() != OrderStatus.ASSIGNED) {
