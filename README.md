@@ -10,7 +10,7 @@ This project demonstrates production-grade architecture, including stateless JWT
   * **Language:** Java 17
   * **Framework:** Spring Boot 3.5.7
   * **Database:** PostgreSQL (Primary), Redis (Geospatial & Caching)
-  * **Security:** Spring Security 6 + JWT (Stateless)
+  * **Security:** Spring Security 6 + JWT (Stateless), Bucket4j (Rate Limiting)
   * **Infrastructure:** Docker & Docker Compose
   * **Build Tool:** Maven
 
@@ -18,33 +18,43 @@ This project demonstrates production-grade architecture, including stateless JWT
 
 ## ⚡️ Features
 
-### ✅ Authentication & Security (Phase 1)
+### ✅ Authentication & Security
 
   * **JWT Auth:** Stateless authentication using `jjwt`.
   * **RBAC:** Role-Based Access Control (`CUSTOMER`, `PARTNER`, `ADMIN`).
   * **Secure Passwords:** BCrypt hashing implementation.
   * **Validation:** Strict input validation using Java Bean Validation (`@Valid`).
 
-### 📦 Order Management (Phase 2)
+### 🛡️ System Resilience & Protection
+
+  * **Rate Limiting (Bucket4j):** Implemented "Token Bucket" algorithm to protect against abuse.
+      * **Login Protection:** Limits login attempts based on IP address (5 attempts/min).
+      * **Order Protection:** Limits order creation per User ID (1 order/10sec).
+      * **Handling:** Returns `429 Too Many Requests` when limits are exceeded.
+  * **Concurrency Control:**
+      * **Pessimistic Locking:** Uses `PESSIMISTIC_WRITE` locks on the Order repository to prevent race conditions (e.g., stopping multiple partners from accepting the same order simultaneously).
+      * **Transactional Integrity:** Full `@Transactional` coverage across critical services (`assignOrder`, `createOrder`) ensures ACID compliance and prevents "Zombie" data during failures.
+
+### 📦 Order Management
 
   * **Order Lifecycle:** Full state machine (`CREATED` → `ASSIGNED` → `ACCEPTED` → `PICKED` → `DELIVERED`).
   * **Customer Flow:** Create orders, view history, and cancel active orders.
   * **Error Handling:** Global Exception Handling with standardized JSON error responses.
 
-### 🚚 Smart Logistics Engine (Phase 3)
+### 🚚 Smart Logistics Engine
 
   * **Geospatial Assignment:** Uses **Redis GEOSEARCH** to find partners within a 3km radius of the pickup point.
-  * **Smart Filtering:** "Funnel" logic filters for nearby drivers -\> checks database availability -\> selects the least busy driver.
+  * **Smart Filtering:** "Funnel" logic filters for nearby drivers -> checks database availability -> selects the least busy driver.
   * **Resilience:** Circuit-breaker logic falls back to Database Search if the Redis tracking engine fails.
   * **Ghost Partner Handling:** Safely ignores stale tracking data to prevent system crashes.
 
-### 👁️ Visibility & Tracking (Phase 4)
+### 👁️ Visibility & Tracking
 
-  * **Real-Time Tracking:** Customers can track their active orders (`ACCEPTED` -\> `PICKED`) with strict privacy controls.
+  * **Real-Time Tracking:** Customers can track their active orders (`ACCEPTED` -> `PICKED`) with strict privacy controls.
   * **Admin "God Mode":** Operations teams can verify the live location of any partner (Online or Offline).
   * **Security:** Ownership validation ensures customers can only track their own orders.
 
-### 👑 Admin Dashboard (Phase 5)
+### 👑 Admin Dashboard
 
   * **Search Engine:** Dynamic filtering by Status, Partner, and Date with Pagination.
   * **God Mode:** Manual override to force-assign stuck orders to specific partners.
@@ -119,5 +129,3 @@ This project demonstrates production-grade architecture, including stateless JWT
 
       * Use the provided collection to simulate the full flow.
       * Use `PUT /partner/location` (via Simulation Script) to update coordinates in Redis.
-
------

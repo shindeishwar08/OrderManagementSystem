@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:alpine
+    container_name: oms-redis
+    ports:
+      - "6379:6379"
+    # This command optimizes memory so it doesn't crash your system
+    command: redis-server --maxmemory 100mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
